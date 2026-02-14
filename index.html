@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Will You Be My Valentine?</title>
+    <style>
+        /* --- Valentine's Theme Styling --- */
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #ffe6e6; /* Pastel Pink Background */
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh; /* Full viewport height */
+            overflow: hidden; /* Prevent scrolling when button moves */
+        }
+
+        /* Container for the main content */
+        .container {
+            text-align: center;
+            width: 80%; /* 4/5 of the screen width */
+            max-width: 600px; /* Max width for larger screens */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            z-index: 10; /* Keep content above background */
+        }
+
+        /* Photo styling */
+        .photo-frame {
+            width: 100%;
+            background-color: white;
+            padding: 10px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            line-height: 0; /* Fix small gap below image */
+        }
+
+        #main-photo {
+            width: 100%;
+            height: auto;
+            border-radius: 10px;
+            object-fit: cover;
+            /* Placeholder styling if image is missing */
+            min-height: 200px; 
+            background-color: #ffcccc;
+        }
+
+        /* Text box styling */
+        #title-text {
+            font-size: 1.5rem;
+            color: #d6336c; /* Deep pink/red */
+            font-weight: bold;
+            background-color: rgba(255, 255, 255, 0.8);
+            padding: 15px;
+            border-radius: 10px;
+            width: 100%;
+            box-sizing: border-box;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            transition: all 0.3s ease;
+        }
+
+        /* Button container */
+        .buttons {
+            display: flex;
+            justify-content: center;
+            gap: 50px; /* Distance between YES and NO */
+            margin-top: 10px;
+            width: 100%;
+            position: relative; /* Context for absolute positioning if needed */
+        }
+
+        /* General Button Styling */
+        button {
+            padding: 12px 30px;
+            font-size: 1.2rem;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: transform 0.2s;
+            font-weight: bold;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        /* Specific Button Colors */
+        #btn-yes {
+            background-color: #20c997; /* Teal/Green for Yes */
+            color: white;
+        }
+
+        #btn-yes:hover {
+            transform: scale(1.1);
+            background-color: #1aa179;
+        }
+
+        #btn-no {
+            background-color: #fa5252; /* Red for No */
+            color: white;
+            /* Important for moving it around */
+            position: relative; 
+            transition: all 0.1s ease; /* Snappy movement */
+        }
+
+        /* Mobile Adjustments */
+        @media (max-width: 600px) {
+            #title-text {
+                font-size: 1.2rem;
+            }
+            .buttons {
+                gap: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="photo-frame">
+            <img id="main-photo" src="init.jpg" alt="Valentine Photo">
+        </div>
+
+        <div id="title-text">I know it's cheesy, but will you be my valentine?</div>
+
+        <div class="buttons">
+            <button id="btn-yes">YES</button>
+            <button id="btn-no">NO</button>
+        </div>
+    </div>
+
+    <script>
+        // Get elements
+        const yesBtn = document.getElementById('btn-yes');
+        const noBtn = document.getElementById('btn-no');
+        const mainPhoto = document.getElementById('main-photo');
+        const titleText = document.getElementById('title-text');
+        
+        // Define paths to images
+        const imgInit = 'init.jpg';
+        const imgYes = 'yes.jpg';
+        const imgNo = 'no.jpg';
+
+        // --- "NO" BUTTON LOGIC ---
+        
+        // Function to move the button and change state
+        function evadeAndRefuse(e) {
+            // Prevent default touch actions on mobile to stop standard clicking
+            if(e.type === 'touchstart') e.preventDefault();
+
+            // 1. Change Photo and Text
+            mainPhoto.src = imgNo;
+            titleText.innerText = "ÖFF YAAA";
+            
+            // 2. Move Button Logic
+            // We switch position to 'fixed' to allow it to roam the whole screen freely
+            noBtn.style.position = 'fixed';
+            
+            // Get viewport dimensions
+            const viewportWidth = window.innerWidth;
+            const viewportHeight = window.innerHeight;
+            
+            // Get button dimensions
+            const btnWidth = noBtn.offsetWidth;
+            const btnHeight = noBtn.offsetHeight;
+            
+            // Calculate random position (ensure it stays within screen)
+            // We subtract button size so it doesn't go off-screen
+            const randomX = Math.random() * (viewportWidth - btnWidth - 20) + 10; 
+            const randomY = Math.random() * (viewportHeight - btnHeight - 20) + 10;
+            
+            noBtn.style.left = randomX + 'px';
+            noBtn.style.top = randomY + 'px';
+        }
+
+        // Add event listeners for Desktop (Hover)
+        noBtn.addEventListener('mouseover', evadeAndRefuse);
+        
+        // Add event listeners for Mobile (Touch)
+        // 'touchstart' fires immediately when a finger touches the element
+        noBtn.addEventListener('touchstart', evadeAndRefuse);
+
+
+        // --- "YES" BUTTON LOGIC ---
+
+        yesBtn.addEventListener('click', () => {
+            // Change Photo
+            mainPhoto.src = imgYes;
+            
+            // Change Text
+            titleText.innerText = "Yaaaa, inanamıyorum!!!";
+            titleText.style.backgroundColor = "#fff0f6"; // Make text box slightly pinker
+            
+            // Optional: Hide the NO button after YES is clicked
+            noBtn.style.display = 'none';
+            
+            // Optional: Add some celebration confetti styling to YES button
+            yesBtn.innerText = "❤️";
+            yesBtn.style.transform = "scale(1.2)";
+        });
+
+    </script>
+</body>
+</html>
