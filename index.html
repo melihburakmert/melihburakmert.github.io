@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Will You Be My Valentine?</title>
+    <title>Will You Be My Valentine? 😏</title>
     <style>
         /* --- Valentine's Theme Styling --- */
         body {
@@ -15,20 +15,31 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            height: 100vh; /* Full viewport height */
+            min-height: 100vh; /* Full viewport height */
             overflow: hidden; /* Prevent scrolling when button moves */
+            touch-action: manipulation; /* Improves touch response on mobile */
         }
 
         /* Container for the main content */
         .container {
             text-align: center;
-            width: 80%; /* 4/5 of the screen width */
-            max-width: 600px; /* Max width for larger screens */
+            width: 85%; /* Slightly wider for mobile */
+            max-width: 600px;
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 20px;
-            z-index: 10; /* Keep content above background */
+            gap: 15px; /* Reduced gap slightly to fit new title */
+            z-index: 10;
+        }
+
+        /* NEW: Top Title Styling */
+        #main-title {
+            font-size: 2.2rem;
+            color: #c92a2a; /* Strong Red */
+            margin: 0;
+            font-weight: 800;
+            text-shadow: 2px 2px 0px rgba(255, 255, 255, 0.5);
+            font-family: 'Courier New', Courier, monospace; /* Typewriter style */
         }
 
         /* Photo styling */
@@ -37,8 +48,14 @@
             background-color: white;
             padding: 10px;
             border-radius: 15px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            line-height: 0; /* Fix small gap below image */
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+            line-height: 0; 
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .photo-frame:active {
+            transform: scale(0.98); 
         }
 
         #main-photo {
@@ -46,33 +63,34 @@
             height: auto;
             border-radius: 10px;
             object-fit: cover;
-            /* Placeholder styling if image is missing */
             min-height: 200px; 
             background-color: #ffcccc;
         }
 
         /* Text box styling */
         #title-text {
-            font-size: 1.5rem;
+            font-size: 1.3rem;
             color: #d6336c; /* Deep pink/red */
             font-weight: bold;
-            background-color: rgba(255, 255, 255, 0.8);
+            background-color: rgba(255, 255, 255, 0.9);
             padding: 15px;
             border-radius: 10px;
             width: 100%;
             box-sizing: border-box;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
             transition: all 0.3s ease;
+            user-select: none; 
         }
 
         /* Button container */
         .buttons {
             display: flex;
             justify-content: center;
-            gap: 50px; /* Distance between YES and NO */
-            margin-top: 10px;
+            gap: 40px; 
+            margin-top: 5px;
             width: 100%;
-            position: relative; /* Context for absolute positioning if needed */
+            height: 60px; /* Reserve height so layout doesn't jump */
+            position: relative; 
         }
 
         /* General Button Styling */
@@ -85,12 +103,12 @@
             transition: transform 0.2s;
             font-weight: bold;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            color: white;
+            -webkit-tap-highlight-color: transparent; 
         }
 
-        /* Specific Button Colors */
         #btn-yes {
-            background-color: #20c997; /* Teal/Green for Yes */
-            color: white;
+            background-color: #20c997; /* Teal */
         }
 
         #btn-yes:hover {
@@ -99,17 +117,18 @@
         }
 
         #btn-no {
-            background-color: #fa5252; /* Red for No */
-            color: white;
-            /* Important for moving it around */
-            position: relative; 
-            transition: all 0.1s ease; /* Snappy movement */
+            background-color: #fa5252; /* Red */
+            position: absolute; /* Changed to absolute to sit in center initially */
+            transition: all 0.1s ease; 
         }
 
         /* Mobile Adjustments */
         @media (max-width: 600px) {
+            #main-title {
+                font-size: 1.8rem;
+            }
             #title-text {
-                font-size: 1.2rem;
+                font-size: 1.1rem;
             }
             .buttons {
                 gap: 20px;
@@ -120,11 +139,13 @@
 <body>
 
     <div class="container">
-        <div class="photo-frame">
+        <h1 id="main-title">It's Valentine's Day!!!</h1>
+
+        <div class="photo-frame" id="photo-frame" title="Click to Reset">
             <img id="main-photo" src="init.jpg" alt="Valentine Photo">
         </div>
 
-        <div id="title-text">I know it's cheesy, but will you be my valentine?</div>
+        <div id="title-text">I know it's cheesy, but will you be my valentine? 👉👈</div>
 
         <div class="buttons">
             <button id="btn-yes">YES</button>
@@ -133,42 +154,39 @@
     </div>
 
     <script>
-        // Get elements
         const yesBtn = document.getElementById('btn-yes');
         const noBtn = document.getElementById('btn-no');
         const mainPhoto = document.getElementById('main-photo');
         const titleText = document.getElementById('title-text');
+        const photoFrame = document.getElementById('photo-frame');
         
-        // Define paths to images
+        // Configuration
         const imgInit = 'init.jpg';
         const imgYes = 'yes.jpg';
         const imgNo = 'no.jpg';
+        const initialText = "I know it's cheesy, but will you be my valentine? 👉👈";
 
-        // --- "NO" BUTTON LOGIC ---
-        
-        // Function to move the button and change state
+        // Initial setup to place NO button correctly next to YES
+        // We use absolute positioning for NO so it can fly freely later
+        // But initially, we want it relatively centered.
+        // Simple hack: We'll leave it static (relative) first, then switch to fixed when it moves.
+        noBtn.style.position = "relative";
+
+        // --- "NO" LOGIC ---
         function evadeAndRefuse(e) {
-            // Prevent default touch actions on mobile to stop standard clicking
             if(e.type === 'touchstart') e.preventDefault();
 
-            // 1. Change Photo and Text
             mainPhoto.src = imgNo;
-            titleText.innerText = "ÖFF YAAA";
+            titleText.innerText = "ÖFF YAAA 😖" ;
             
-            // 2. Move Button Logic
-            // We switch position to 'fixed' to allow it to roam the whole screen freely
+            // Switch to fixed to allow full screen movement
             noBtn.style.position = 'fixed';
             
-            // Get viewport dimensions
             const viewportWidth = window.innerWidth;
             const viewportHeight = window.innerHeight;
-            
-            // Get button dimensions
             const btnWidth = noBtn.offsetWidth;
             const btnHeight = noBtn.offsetHeight;
             
-            // Calculate random position (ensure it stays within screen)
-            // We subtract button size so it doesn't go off-screen
             const randomX = Math.random() * (viewportWidth - btnWidth - 20) + 10; 
             const randomY = Math.random() * (viewportHeight - btnHeight - 20) + 10;
             
@@ -176,30 +194,35 @@
             noBtn.style.top = randomY + 'px';
         }
 
-        // Add event listeners for Desktop (Hover)
         noBtn.addEventListener('mouseover', evadeAndRefuse);
-        
-        // Add event listeners for Mobile (Touch)
-        // 'touchstart' fires immediately when a finger touches the element
         noBtn.addEventListener('touchstart', evadeAndRefuse);
 
-
-        // --- "YES" BUTTON LOGIC ---
-
+        // --- "YES" LOGIC ---
         yesBtn.addEventListener('click', () => {
-            // Change Photo
             mainPhoto.src = imgYes;
+            titleText.innerText = "Yaaaa, inanamıyorum!!! 🫠";
+            titleText.style.backgroundColor = "#fff0f6"; 
+            noBtn.style.display = 'none'; 
             
-            // Change Text
-            titleText.innerText = "Yaaaa, inanamıyorum!!!";
-            titleText.style.backgroundColor = "#fff0f6"; // Make text box slightly pinker
-            
-            // Optional: Hide the NO button after YES is clicked
-            noBtn.style.display = 'none';
-            
-            // Optional: Add some celebration confetti styling to YES button
+            // Celebration effect
             yesBtn.innerText = "❤️";
             yesBtn.style.transform = "scale(1.2)";
+        });
+
+        // --- RESET LOGIC ---
+        photoFrame.addEventListener('click', () => {
+            mainPhoto.src = imgInit;
+            titleText.innerText = initialText;
+            titleText.style.backgroundColor = "rgba(255, 255, 255, 0.9)";
+
+            yesBtn.innerText = "YES";
+            yesBtn.style.transform = "scale(1)";
+
+            // Bring NO button back
+            noBtn.style.display = "inline-block";
+            noBtn.style.position = "relative"; // Put it back in the flow
+            noBtn.style.left = "auto";
+            noBtn.style.top = "auto";
         });
 
     </script>
